@@ -3,10 +3,10 @@ import numpy as np
 from scipy.io.wavfile import write
 import winsound
 from pynput import keyboard
-import whisper
+from faster_whisper import WhisperModel
 
 
-model = whisper.load_model("small")
+model = WhisperModel("small", device="cpu", compute_type="int8")
 stop_flag = False
 # ---  Recording  ---
 def on_key_press(key):
@@ -63,10 +63,15 @@ def record_audio(filename="input/audio_input.wav", fs=44100, silence_threshold=2
     write(filename, fs, audio)
     print("✅ Audio sauvegardé dans", filename)
     
-# ---  Transcription  ---
+# --- Transcription ---
 def transcribe_audio(file_path=r"C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\AI-ssistant\input\audio_input.wav"):
-    result = model.transcribe(file_path)
-    return result["text"]
+    segments, info = model.transcribe(file_path)
+
+    text = ""
+    for segment in segments:
+        text += segment.text
+
+    return text.strip()
 
 # --- Playback ---
 def play_audio(path= r"C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\AI-ssistant\output\mesmerla_out.wav"):
