@@ -20,7 +20,6 @@ def text_conversation(llm, user_input: str, personality: str = "Mesmerla", mode:
         memory_block=memory_block,
         user_input=user_input.strip()
     )
-
     reply = generate_response(
         llm=llm,
         prompt=prompt,
