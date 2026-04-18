@@ -1,0 +1,32 @@
+C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (7.1.0)/charset_normalizer (3.4.5) doesn't match a supported version!
+  warnings.warn(
+Traceback (most recent call last):
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\GPT-SoVITS\GPT_SoVITS\mesmerla_socket_server.py", line 9, in <module>
+    from GPT_SoVITS.inference_webui import get_tts_wav, change_gpt_weights, change_sovits_weights
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\GPT-SoVITS\GPT_SoVITS\inference_webui.py", line 96, in <module>
+    import gradio as gr
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\__init__.py", line 3, in <module>
+    import gradio._simple_templates
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\_simple_templates\__init__.py", line 1, in <module>
+    from .simpledropdown import SimpleDropdown
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\_simple_templates\simpledropdown.py", line 6, in <module>
+    from gradio.components.base import FormComponent
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\components\__init__.py", line 1, in <module>
+    from gradio.components.annotated_image import AnnotatedImage
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\components\annotated_image.py", line 14, in <module>
+    from gradio.components.base import Component
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\components\base.py", line 20, in <module>
+    from gradio.blocks import Block, BlockContext
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\blocks.py", line 29, in <module>
+    from gradio import (
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\networking.py", line 13, in <module>
+    from gradio.routes import App  # HACK: to avoid circular import # noqa: F401
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\routes.py", line 58, in <module>
+    from gradio import ranged_response, route_utils, utils, wasm_utils
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\route_utils.py", line 45, in <module>
+    from gradio.helpers import EventData
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\helpers.py", line 24, in <module>
+    from gradio import components, oauth, processing_utils, routes, utils, wasm_utils
+  File "C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\gradio\oauth.py", line 12, in <module>
+    from huggingface_hub import HfFolder, whoami
+ImportError: cannot import name 'HfFolder' from 'huggingface_hub' (C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\mesmerla-gpt-sovits_venv\lib\site-packages\huggingface_hub\__init__.py)

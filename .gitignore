@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+mesmerla-env/
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models / caches
+*.pt
+*.bin
+*.safetensors
+*.onnx
+*.wav
+*.mp3
+*.gguf
+
+# HuggingFace cache
+.cache/
