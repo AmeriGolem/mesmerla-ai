@@ -5,9 +5,21 @@ import winsound
 from pynput import keyboard
 from faster_whisper import WhisperModel
 
-
-model = WhisperModel("small", device="cpu", compute_type="int8")
+model = None
 stop_flag = False
+
+fs = 44100
+
+def get_whisper_model():
+    global model
+    if model is None:
+        model = WhisperModel(
+            r"AI-ssistant\models\faster-whisper-small",
+            device="cpu", 
+            compute_type="int8"
+        )
+    return model
+
 # ---  Recording  ---
 def on_key_press(key):
     global stop_flag
@@ -15,11 +27,12 @@ def on_key_press(key):
         if key == keyboard.Key.space or key == keyboard.Key.enter:
             print("🛑 Touche pressée. Arrêt manuel.")
             stop_flag = True
+            
             return False  # stop the listener
     except:
         pass
 
-def record_audio(filename="input/audio_input.wav", fs=44100, silence_threshold=2500, max_silence_duration=0.75):
+def record_audio(filename=r"AI-ssistant\input\audio_input.wav", fs=44100, silence_threshold=2500, max_silence_duration=0.75):
     global stop_flag
     stop_flag = False
     buffer = []
@@ -65,6 +78,7 @@ def record_audio(filename="input/audio_input.wav", fs=44100, silence_threshold=2
     
 # --- Transcription ---
 def transcribe_audio(file_path=r"C:\Users\aberl\Desktop\Projet Code\Mesmerla_AI\AI-ssistant\input\audio_input.wav"):
+    model = get_whisper_model()
     segments, info = model.transcribe(file_path)
 
     text = ""

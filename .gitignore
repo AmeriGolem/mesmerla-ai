@@ -15,6 +15,9 @@ venv/
 # VSCode
 .vscode/
 
+# faster-whisper
+faster-whisper-small/
+
 # OS
 .DS_Store
 Thumbs.db
