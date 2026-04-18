@@ -17,7 +17,15 @@ def load_model(model_path, n_ctx=2048, n_threads=12, n_batch=64, verbose=False):
     return llm
 
 
-def generate_response(llm, prompt, max_tokens=256, temperature=0.7, top_p=0.9, repeat_penalty=1.1,verbose=False):
+def generate_response(
+    llm, 
+    prompt, 
+    max_tokens=256, 
+    temperature=0.7, 
+    top_p=0.9, 
+    repeat_penalty=1.1,
+    verbose=False
+):
     start = time.time()
     result = llm(
         prompt,
@@ -25,7 +33,7 @@ def generate_response(llm, prompt, max_tokens=256, temperature=0.7, top_p=0.9, r
         temperature=temperature,
         top_p=top_p,
         repeat_penalty=repeat_penalty,
-        stop=["User:", "Mesmerla:", "\n\n"]
+        stop=["User:", "Mesmerla:", "Mesmerlo:", "Hu Tao:", "\n\n"],
     )
     output = result["choices"][0]["text"].strip()
     if verbose:

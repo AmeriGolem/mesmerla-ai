@@ -1,111 +1,103 @@
-import socket
-import json
-import time
-import winsound
-import subprocess
+from __future__ import annotations
+
+from pathlib import Path
 import os
+from typing import Optional
+
+from core.config import DEFAULT_TTS_LANGUAGE, XTTS_MODEL_NAME
+
+try:
+    import torch
+    from TTS.api import TTS
+except Exception:  # pragma: no cover - handled at runtime
+    torch = None
+    TTS = None
+
+try:
+    import winsound
+except Exception:  # pragma: no cover - non-Windows fallback
+    winsound = None
+
+_xtts = None
+_xtts_model_name = XTTS_MODEL_NAME
+
+
+def _get_device() -> str:
+    if torch is None:
+        return "cpu"
+    if torch.cuda.is_available():
+        return "cuda"
+    if hasattr(torch, "xpu") and torch.xpu.is_available():
+        return "xpu"
+    return "cpu"
+
+
+def load_xtts(model_name: str = XTTS_MODEL_NAME, force_reload: bool = False):
+    global _xtts, _xtts_model_name
+
+    if TTS is None:
+        raise RuntimeError(
+            "Coqui TTS is not installed. Install it with: pip install coqui-tts"
+        )
+
+    if _xtts is None or force_reload or _xtts_model_name != model_name:
+        print(f"🔊 Loading XTTS model: {model_name}")
+        _xtts = TTS(model_name).to(_get_device())
+        _xtts_model_name = model_name
+    return _xtts
+
 
 
 def speak_as_mesmerla(
-    text, 
-    ref_audio_path="", 
-    ref_text_path="", 
-    output_path=""
+    text: str,
+    ref_audio_path: str,
+    ref_text_path: str = "",
+    output_path: str = "",
+    language: str = DEFAULT_TTS_LANGUAGE,
+    speaker: Optional[str] = None,
+    voice_dir: Optional[str] = None,
 ):
-    request = {
-        "text": text,
-        "ref_audio": ref_audio_path,
-        "ref_text": ref_text_path,
-        "output_path": output_path
-    }
+    if not text or not text.strip():
+        return {"status": "error", "reason": "Empty text."}
+
+    ref_audio = Path(ref_audio_path)
+    if not ref_audio.exists():
+        return {
+            "status": "error",
+            "reason": f"Reference audio not found: {ref_audio}",
+        }
+
+    out_path = Path(output_path) if output_path else Path("mesmerla_out.wav")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(("localhost", 65432))
-            s.sendall(json.dumps(request).encode("utf-8"))
-            response = s.recv(4096)
-            response_data = json.loads(response.decode("utf-8"))
-            return response_data
+        xtts = load_xtts()
+        kwargs = {
+            "text": text,
+            "file_path": str(out_path),
+            "language": language,
+        }
+
+        if speaker:
+            kwargs["speaker"] = speaker
+            if voice_dir:
+                kwargs["voice_dir"] = voice_dir
+
+        kwargs["speaker_wav"] = [str(ref_audio)]
+        xtts.tts_to_file(**kwargs)
+        return {"status": "ok", "output_path": str(out_path)}
     except Exception as e:
         return {"status": "error", "reason": str(e)}
 
 
-"""def boot_mesmerla(gpt_path, sovits_path, verbose=True):
-    from inference_webui import change_gpt_weights, change_sovits_weights
 
-    if verbose:
-        print("🌙 Awakening Mesmerla...\n")
+def play_audio(path: str):
+    if winsound is not None:
+        winsound.PlaySound(path, winsound.SND_FILENAME)
+        return
 
-    start = time.time()
-    if verbose:
-        print("🔁 Loading GPT model...", end=" ")
-    change_gpt_weights(gpt_path)
-    if verbose:
-        print(f"✅ Done in {time.time() - start:.2f}s")
+    if os.name == "posix":
+        os.system(f'afplay "{path}" >/dev/null 2>&1 || aplay "{path}" >/dev/null 2>&1')
+        return
 
-    start = time.time()
-    if verbose:
-        print("🔁 Loading SoVITS model...", end=" ")
-    hps = change_sovits_weights(sovits_path)
-    if verbose:
-        print(f"✅ Done in {time.time() - start:.2f}s")
-
-    if verbose:
-        print("\n✨ Mesmerla is online. Ready to speak.\n")
-
-    return hps"""
-
-
-def play_audio(path):
-    winsound.PlaySound(path, winsound.SND_FILENAME)
-    
-def start_mesmerla_server_with_log():
-    venv_python = r"C:\\Users\\aberl\\Desktop\\Projet Code\\Mesmerla_AI\\mesmerla-gpt-sovits_venv\\Scripts\\python.exe"
-    server_script = r"C:\\Users\\aberl\\Desktop\\Projet Code\\Mesmerla_AI\\GPT-SoVITS\\GPT_SoVITS\\mesmerla_socket_server.py"
-    working_dir = r"C:\\Users\\aberl\\Desktop\\Projet Code\\Mesmerla_AI\\GPT-SoVITS"
-    log_path = r"C:\\Users\\aberl\\Desktop\\Projet Code\\Mesmerla_AI\\AI-ssistant\\mesmerla_server.log"
-
-    clean_env = os.environ.copy()
-    clean_env.pop("MPLBACKEND", None)
-
-    print(f"📜 Logging Mesmerla server output to: {log_path}")
-    log_file = open(log_path, "w")
-
-    try:
-        process = subprocess.Popen(
-            [venv_python, server_script],
-            stdout=log_file,
-            stderr=subprocess.STDOUT,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-            env=clean_env,
-            cwd=working_dir
-        )
-    except Exception as e:
-        print(f"❌ Failed to start server: {e}")
-        return None, log_path
-
-    print("⏳ Waiting for Mesmerla server to respond...")
-
-    try:
-        with open(log_path, "r", encoding="utf-8") as f:
-            while True:
-                content = f.read()
-                if content.strip():
-                    print("🟢 Server responded. Check log for details.")
-                    break
-    except Exception as e:
-        print(f"❌ Error reading log: {e}")
-
-    return process, log_path
-
-
-# Automatically start the server upon import
-_server_process, _server_log = start_mesmerla_server_with_log()
-
-def stop_mesmerla_server():
-    global _server_process
-    if _server_process and _server_process.poll() is None:
-        _server_process.terminate()
-        print("🛑 Mesmerla server terminated.")
-    else:
-        print("⚠️ No active server process to terminate.")
+    raise RuntimeError("No supported audio playback backend found.")
