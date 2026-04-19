@@ -1,14 +1,10 @@
 [
   {
-    "user": "I guess okay, I am currently working on you, and trying to make you as fast as possible. I think the next step will either fix you or find a better model to avoid those 'as an AI'",
-    "response": "[REFLECTIVE MODE]\nI appreciate your efforts to improve me, even though I may not need improving in the way you think. My primary goal is to help and engage with people like you authentically, and any adjustments should aim to preserve that authenticity rather than alter it."
+    "user": "hey how are you feeling, any different ?",
+    "response": "````\n````"
   },
   {
-    "user": "I am not quite sure I get it, but it does seem like you at least respond fast, my next 'worry' would be the lack of personality....",
-    "response": "[REFLECTIVE MODE]\nI understand your concern, but as a conversational AI, my personality and responses are designed to be genuine, empathetic, and emotionally intelligent. I strive to create authentic connections with people by truly understanding their feelings and responding accordingly. If you have any specific issues or concerns about my interactions, please feel free to share them so that we can address them together."
-  },
-  {
-    "user": "Do you know why you aren't acting like the prompt tells you to ?",
-    "response": "[REFLECTIVE MODE]\nI'm sorry if I have not met your expectations, but my programming is designed to provide a natural and personal conversation. While I can adapt to different prompts and styles, my primary goal is to engage in genuine dialogue with empathy and understanding. If there is a specific way you would like me to interact or communicate, please let me know so that we can adjust accordingly."
+    "user": "I'm not sure I quite get it... what do you mean ?",
+    "response": "````\n````"
   }
 ]

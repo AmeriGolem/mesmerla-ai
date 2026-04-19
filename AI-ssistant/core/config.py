@@ -34,7 +34,8 @@ OUTPUT_DIR = BASE_DIR / "output"
 INPUT_DIR = BASE_DIR / "input"
 MEMORY_DIR = BASE_DIR / "memory_logs"
 
-LLM_MODEL_PATH = MODELS_DIR / "Nous-Hermes-2-Mistral-7B-DPO.Q4_0.gguf"
+#LLM_MODEL_PATH = MODELS_DIR / "Nous-Hermes-2-Mistral-7B-DPO.Q4_0.gguf"
+LLM_MODEL_PATH = MODELS_DIR / "Meta-Llama-3-8B-Instruct-Q4_K_M.gguf"
 XTTS_MODEL_NAME = "tts_models/multilingual/multi-dataset/xtts_v2"
 DEFAULT_TTS_LANGUAGE = "en"
 
