@@ -16,9 +16,9 @@ import torch
 import TTS.tts.models.xtts as xtts_mod
 
 # Settings
-personality = "Ayaka"
-mode = "reflective"
-tts_language = DEFAULT_TTS_LANGUAGE
+personality = "Mesmerla"
+mode = input("Enter mode (default: 'reflective', there is also 'concise', and 'passionate'): ") or "reflective"
+tts_language = input(f"Enter TTS language (default: {DEFAULT_TTS_LANGUAGE}): ") or DEFAULT_TTS_LANGUAGE
 
 memory = MesmerlaMemory(personality)
 memory.reset()
