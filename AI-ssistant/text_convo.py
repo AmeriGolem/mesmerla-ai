@@ -15,14 +15,14 @@ def text_conversation(llm, user_input: str, personality: str = "Mesmerla", mode:
     mode_block = f"[{mode.upper()} MODE]\n{config['description']}"
     memory_block = memory.get_memory_block()
 
-    prompt = template.format(
+    system_prompt = template.format(
         mode_block=mode_block,
-        memory_block=memory_block,
-        user_input=user_input.strip()
+        memory_block=memory_block
     )
     reply = generate_response(
         llm=llm,
-        prompt=prompt,
+        system_prompt=system_prompt,
+        user_prompt=user_input.strip(),
         max_tokens=config["max_tokens"],
         temperature=config["temperature"],
         top_p=config["top_p"],
@@ -33,4 +33,4 @@ def text_conversation(llm, user_input: str, personality: str = "Mesmerla", mode:
     memory.add(user_input, reply)
     memory.save(verbose=verbose)
 
-    return reply, prompt
+    return reply, system_prompt

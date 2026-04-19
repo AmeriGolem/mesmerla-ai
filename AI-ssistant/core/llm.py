@@ -1,5 +1,16 @@
 from llama_cpp import Llama
 import time
+import gc
+
+def clear_xpu():
+    gc.collect()
+    try:
+        import torch
+        if hasattr(torch, "xpu") and torch.xpu.is_available():
+            torch.xpu.synchronize()
+            torch.xpu.memory.empty_cache()
+    except Exception:
+        pass
 
 # Load the default Mesmerla model (Mistral)
 def load_model(model_path, n_ctx=2048, n_threads=12, n_batch=64, verbose=False):
@@ -18,24 +29,32 @@ def load_model(model_path, n_ctx=2048, n_threads=12, n_batch=64, verbose=False):
 
 
 def generate_response(
-    llm, 
-    prompt, 
-    max_tokens=256, 
-    temperature=0.7, 
-    top_p=0.9, 
+    llm,
+    system_prompt,
+    user_prompt,
+    max_tokens=256,
+    temperature=0.7,
+    top_p=0.9,
     repeat_penalty=1.1,
-    verbose=False
+    verbose=False,
 ):
     start = time.time()
-    result = llm(
-        prompt,
+
+    result = llm.create_chat_completion(
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
         max_tokens=max_tokens,
         temperature=temperature,
         top_p=top_p,
         repeat_penalty=repeat_penalty,
-        stop=["User:", "Mesmerla:", "Mesmerlo:", "Hu Tao:", "\n\n"],
     )
-    output = result["choices"][0]["text"].strip()
+
+    output = result["choices"][0]["message"]["content"].strip()
+
     if verbose:
         print(f"⏱️ LLM response time: {time.time() - start:.2f}s")
+
+    clear_xpu()
     return output

@@ -39,15 +39,15 @@ def conversation_with_AI(
     config = MODES.get(mode, MODES["reflective"])
     mode_block = f"[{mode.upper()} MODE]\n{config['description']}"
     memory_block = memory.get_memory_block()
-    prompt = template.format(
+    system_prompt = template.format(
         mode_block=mode_block,
-        memory_block=memory_block,
-        user_input=transcript,
+        memory_block=memory_block
     )
 
     reply = generate_response(
         llm=llm,
-        prompt=prompt,
+        system_prompt=system_prompt,
+        user_prompt=transcript,
         max_tokens=config["max_tokens"],
         temperature=config["temperature"],
         top_p=config["top_p"],
@@ -92,15 +92,15 @@ def text_conversation(
     config = MODES.get(mode, MODES["reflective"])
     mode_block = f"[{mode.upper()} MODE]\n{config['description']}"
     memory_block = memory.get_memory_block()
-    prompt = template.format(
+    system_prompt = template.format(
         mode_block=mode_block,
-        memory_block=memory_block,
-        user_input=user_input.strip(),
+        memory_block=memory_block
     )
 
     reply = generate_response(
         llm=llm,
-        prompt=prompt,
+        system_prompt=system_prompt,
+        user_prompt=user_input.strip(),
         max_tokens=config["max_tokens"],
         temperature=config["temperature"],
         top_p=config["top_p"],

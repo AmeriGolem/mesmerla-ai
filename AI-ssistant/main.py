@@ -10,6 +10,11 @@ from core.llm import load_model
 from core.memory import MesmerlaMemory
 from core.tts import load_xtts
 
+import numpy as np
+import soundfile as sf
+import torch
+import TTS.tts.models.xtts as xtts_mod
+
 # Settings
 personality = "Ayaka"
 mode = "reflective"
@@ -27,6 +32,21 @@ llm = load_model(
     n_batch=64,
     verbose=False,
 )
+
+def patched_load_audio(audiopath, sampling_rate):
+    audio, sr = sf.read(audiopath, dtype="float32")
+    if audio.ndim > 1:
+        audio = np.mean(audio, axis=1)  # stereo -> mono
+
+    audio = torch.from_numpy(audio).unsqueeze(0)
+
+    if sr != sampling_rate:
+        import torchaudio.functional as F
+        audio = F.resample(audio, sr, sampling_rate)
+
+    return audio
+
+xtts_mod.load_audio = patched_load_audio
 
 # Preload XTTS once so first reply is not painfully slow.
 load_xtts()

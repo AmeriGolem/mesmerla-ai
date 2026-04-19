@@ -5,6 +5,7 @@ import os
 from typing import Optional
 
 from core.config import DEFAULT_TTS_LANGUAGE, XTTS_MODEL_NAME
+import gc
 
 try:
     import torch
@@ -22,6 +23,14 @@ _xtts = None
 _xtts_model_name = XTTS_MODEL_NAME
 
 
+def clear_memory():
+    gc.collect()
+    if torch is not None:
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        if hasattr(torch, "xpu") and torch.xpu.is_available():
+            torch.xpu.empty_cache()
+
 def _get_device() -> str:
     if torch is None:
         return "cpu"
@@ -29,6 +38,7 @@ def _get_device() -> str:
         return "cuda"
     if hasattr(torch, "xpu") and torch.xpu.is_available():
         return "xpu"
+        pass
     return "cpu"
 
 
@@ -85,8 +95,10 @@ def speak_as_mesmerla(
 
         kwargs["speaker_wav"] = [str(ref_audio)]
         xtts.tts_to_file(**kwargs)
+        clear_memory()
         return {"status": "ok", "output_path": str(out_path)}
     except Exception as e:
+        clear_memory()
         return {"status": "error", "reason": str(e)}
 
 

@@ -1,10 +1,10 @@
 [
   {
-    "user": "hey how are you feeling, any different ?",
-    "response": "````\n````"
+    "user": "Est-ce que tu m'entends? Can you hear me?",
+    "response": "Oui... I think so. Your words are reaching me, and I'm trying to make sense of them. It's just that sometimes it takes a moment for my thoughts to catch up. But yes, I can hear you, and I'm listening."
   },
   {
-    "user": "I'm not sure I quite get it... what do you mean ?",
-    "response": "````\n````"
+    "user": "So if I keep on having a conversation with you, it will work.",
+    "response": "I think so. It might take a little getting used to, like any new conversation, but I'm here and willing to listen. Just be patient with me, and I'll do my best to respond naturally and thoughtfully."
   }
 ]

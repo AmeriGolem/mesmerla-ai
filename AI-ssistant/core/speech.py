@@ -2,6 +2,7 @@ import sounddevice as sd
 import numpy as np
 from scipy.io.wavfile import write
 import winsound
+from pathlib import Path
 from pynput import keyboard
 from faster_whisper import WhisperModel
 
@@ -13,9 +14,15 @@ fs = 44100
 def get_whisper_model():
     global model
     if model is None:
+        base_dir = Path(__file__).resolve().parents[1]   # AI-ssistant/
+        model_path = base_dir / "models" / "faster-whisper-small"
+
+        if not model_path.is_dir():
+            raise FileNotFoundError(f"Whisper model folder not found: {model_path}")
+
         model = WhisperModel(
-            r"AI-ssistant\models\faster-whisper-small",
-            device="cpu", 
+            str(model_path),
+            device="cpu",
             compute_type="int8"
         )
     return model
