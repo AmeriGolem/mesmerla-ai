@@ -1,11 +1,43 @@
 from __future__ import annotations
 
+from llama_cpp import Llama
+
+from core.config import MODES, DEFAULT_TTS_LANGUAGE, get_paths
+from core.llm import generate_response_stream
 from core.memory import MesmerlaMemory
 from core.speech import record_audio, transcribe_audio
 from core.prompt_builder import get_personality
 from core.tts import speak_as_mesmerla, play_audio
-from core.llm import generate_response
-from core.config import MODES, DEFAULT_TTS_LANGUAGE, get_paths
+
+
+def _stream_reply_to_console(
+    llm: Llama,
+    system_prompt: str,
+    user_prompt: str,
+    config: dict,
+    verbose: bool,
+) -> str:
+    """Print generated text immediately while also collecting the final reply."""
+    
+    parts: list[str] = []
+    
+    print("💬 Mesmerla: ", end="", flush=True)
+    
+    for chunk in generate_response_stream(
+        llm=llm,
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        max_tokens=config["max_tokens"],
+        temperature=config["temperature"],
+        top_p=config["top_p"],
+        repeat_penalty=config["repeat_penalty"],
+        verbose=verbose,
+    ):
+        parts.append(chunk)
+        print(chunk, end="", flush=True)
+    print()
+    
+    return "".join(parts).strip()
 
 
 def conversation_with_AI(
@@ -15,7 +47,7 @@ def conversation_with_AI(
     sil_thresh: int = 5000,
     verbose: bool = False,
     tts_language: str = DEFAULT_TTS_LANGUAGE,
-):
+) -> str:
     if verbose:
         print("🎙️ Starting conversation...\n")
 
@@ -44,17 +76,13 @@ def conversation_with_AI(
         memory_block=memory_block
     )
 
-    reply = generate_response(
+    reply = _stream_reply_to_console(
         llm=llm,
         system_prompt=system_prompt,
         user_prompt=transcript,
-        max_tokens=config["max_tokens"],
-        temperature=config["temperature"],
-        top_p=config["top_p"],
-        repeat_penalty=config["repeat_penalty"],
+        config=config,
         verbose=verbose,
     )
-    print(reply)
 
     response = speak_as_mesmerla(
         text=reply,
@@ -81,10 +109,15 @@ def text_conversation(
     personality: str = "Mesmerla",
     mode: str = "reflective",
     verbose: bool = False,
-):
+) -> str:
+    
     if verbose:
         print("⌨️ Text conversation mode active.\n")
 
+    cleaned_input = user_input.strip()
+    if not cleaned_input:
+        return ""
+    
     template, personality_name = get_personality(personality)
     memory = MesmerlaMemory(style=personality_name)
     memory.load(verb=verbose)
@@ -97,17 +130,15 @@ def text_conversation(
         memory_block=memory_block
     )
 
-    reply = generate_response(
+    reply = _stream_reply_to_console(
         llm=llm,
         system_prompt=system_prompt,
         user_prompt=user_input.strip(),
-        max_tokens=config["max_tokens"],
-        temperature=config["temperature"],
-        top_p=config["top_p"],
-        repeat_penalty=config["repeat_penalty"],
+        config=config,
         verbose=verbose,
     )
 
     memory.add(user_input, reply)
     memory.save(verbose=verbose)
     return reply
+

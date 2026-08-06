@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import os
-from typing import Optional
+from typing import Any, Optional
 
 from core.config import DEFAULT_TTS_LANGUAGE, XTTS_MODEL_NAME
 import gc
@@ -37,7 +37,7 @@ def _get_device() -> str:
     if torch.cuda.is_available():
         return "cuda"
     if hasattr(torch, "xpu") and torch.xpu.is_available():
-        return "xpu"
+        #return "xpu"
         pass
     return "cpu"
 
@@ -82,7 +82,7 @@ def speak_as_mesmerla(
 
     try:
         xtts = load_xtts()
-        kwargs = {
+        kwargs: dict[str, Any] = {
             "text": text,
             "file_path": str(out_path),
             "language": language,

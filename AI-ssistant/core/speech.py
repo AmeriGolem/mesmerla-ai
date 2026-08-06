@@ -46,7 +46,7 @@ def record_audio(filename=r"AI-ssistant\input\audio_input.wav", fs=44100, silenc
     silence_counter = 0
     frame_duration = 0.2
     frame_size = int(fs * frame_duration)
-    has_started_speaking = False  # ← This is the key addition
+    has_started_speaking = False
     
     # Clavier en parallèle
     listener = keyboard.Listener(on_press=on_key_press)
