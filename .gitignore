@@ -18,6 +18,9 @@ venv/
 # faster-whisper
 faster-whisper-small/
 
+# TTS
+AI-ssistant/models/xtts/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -30,6 +33,10 @@ Thumbs.db
 *.wav
 *.mp3
 *.gguf
+*.pth
 
 # HuggingFace cache
 .cache/
+
+# voice splits
+AI-ssistant/models/voices/Marcus_voices_split/

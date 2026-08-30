@@ -53,11 +53,13 @@ def ensure_runtime_dirs() -> None:
         path.mkdir(parents=True, exist_ok=True)
 
 
-def get_paths(personality: str):
+def get_paths(personality: str, combined_audio:bool = False):
     """Return the same tuple shape as the legacy code for compatibility."""
     ensure_runtime_dirs()
     persona = PERSONA_VOICE_MAP.get(personality, personality)
     ref_audio_path = VOICES_DIR / f"{persona}_voice_example.wav"
+    if combined_audio:
+        ref_audio_path = VOICES_DIR / "combined.wav"
     ref_text_path = VOICES_DIR / f"reference_text_{persona}.txt"
     output_path = OUTPUT_DIR / "mesmerla_out.wav"
     input_audio_path = INPUT_DIR / "audio_input.wav"

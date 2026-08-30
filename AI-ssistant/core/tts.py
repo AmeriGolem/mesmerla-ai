@@ -1,115 +1,109 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
+
 import os
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
-from core.config import DEFAULT_TTS_LANGUAGE, XTTS_MODEL_NAME
-import gc
+from RealtimeTTS import TextToAudioStream
+from sympy import im
 
-try:
-    import torch
-    from TTS.api import TTS
-except Exception:  # pragma: no cover - handled at runtime
-    torch = None
-    TTS = None
+FFMPEG_BIN = Path(
+    r"C:\Users\aberl\AppData\Local\Microsoft\WinGet\Packages"
+    r"\Gyan.FFmpeg.Shared_Microsoft.Winget.Source_8wekyb3d8bbwe"
+    r"\ffmpeg-8.1.2-full_build-shared\bin"
+)
 
-try:
-    import winsound
-except Exception:  # pragma: no cover - non-Windows fallback
-    winsound = None
+if not FFMPEG_BIN.is_dir():
+    raise FileNotFoundError(
+        f"Shared FFmpeg directory not found: {FFMPEG_BIN}"
+    )
 
-_xtts = None
-_xtts_model_name = XTTS_MODEL_NAME
+# Make FFmpeg's DLLs visible to TorchCodec and to the Coqui worker process.
+os.environ["PATH"] = f"{FFMPEG_BIN}{os.pathsep}{os.environ.get('PATH', '')}"
+
+if hasattr(os, "add_dll_directory"):
+    os.add_dll_directory(str(FFMPEG_BIN))
 
 
-def clear_memory():
-    gc.collect()
-    if torch is not None:
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        if hasattr(torch, "xpu") and torch.xpu.is_available():
-            torch.xpu.empty_cache()
+import logging
+import torch
+from RealtimeTTS.engines.coqui_engine import CoquiEngine
+from RealtimeTTS.engines.pocket_engine import PocketTTSEngine
 
-def _get_device() -> str:
-    if torch is None:
-        return "cpu"
+from core.config import DEFAULT_TTS_LANGUAGE, MODELS_DIR, XTTS_MODEL_NAME
+
+XTTS_VERSION = "v2.0.2"
+
+
+
+# RealtimeTTS will store the model in:
+# AI-ssistant/models/xtts/v2.0.2/
+XTTS_REALTIME_DIR = MODELS_DIR / "xtts"
+
+
+def _get_tts_device() -> str:
+    """Return a device supported by RealtimeTTS's CoquiEngine."""
     if torch.cuda.is_available():
         return "cuda"
-    if hasattr(torch, "xpu") and torch.xpu.is_available():
-        #return "xpu"
-        pass
+
+    # CoquiEngine currently supports CUDA, MPS and CPU.
+    # Intel XPU is therefore left on CPU for now.
     return "cpu"
 
+def load_tts_engine(
+    engine_type: Literal["coqui", "pocket"],
+    ref_audio_path: str,
+    language: str = DEFAULT_TTS_LANGUAGE,
+) -> CoquiEngine | PocketTTSEngine:
+    """
+    Load RealtimeTTS's engine.
+    can be either "coqui XTTS or PocketTTS"
 
-def load_xtts(model_name: str = XTTS_MODEL_NAME, force_reload: bool = False):
-    global _xtts, _xtts_model_name
+    On the first run, XTTS v2.0.2 is downloaded into the project's
+    models/xtts/v2.0.2 directory.
+    """
+    reference_audio = Path(ref_audio_path)
 
-    if TTS is None:
-        raise RuntimeError(
-            "Coqui TTS is not installed. Install it with: pip install coqui-tts"
+    if not reference_audio.is_file():
+        raise FileNotFoundError(
+            f"{engine_type} reference audio not found: {reference_audio}"
         )
 
-    if _xtts is None or force_reload or _xtts_model_name != model_name:
-        print(f"🔊 Loading XTTS model: {model_name}")
-        _xtts = TTS(model_name).to(_get_device())
-        _xtts_model_name = model_name
-    return _xtts
+    XTTS_REALTIME_DIR.mkdir(parents=True, exist_ok=True)
 
+    print(f"🔊 Loading RealtimeTTS {engine_type} on {_get_tts_device()}...")
+    print(f"📁 {engine_type} model directory: {XTTS_REALTIME_DIR / XTTS_VERSION}")
 
+    match engine_type.lower():
+        case "coqui":
+            engine = CoquiEngine(
+                model_name=XTTS_MODEL_NAME,
+                specific_model=XTTS_VERSION,
+                local_models_path=str(XTTS_REALTIME_DIR),
+                voice=str(reference_audio),
+                language=language,
+                device=_get_tts_device(),
+                level=logging.ERROR,
+                full_sentences=True,
+            )
+        case "pocket":
+            engine = PocketTTSEngine(
+                voice=str(reference_audio),
+                device=_get_tts_device(),
+            )
 
-def speak_as_mesmerla(
-    text: str,
-    ref_audio_path: str,
-    ref_text_path: str = "",
-    output_path: str = "",
-    language: str = DEFAULT_TTS_LANGUAGE,
-    speaker: Optional[str] = None,
-    voice_dir: Optional[str] = None,
-):
-    if not text or not text.strip():
-        return {"status": "error", "reason": "Empty text."}
+    print(f"✅ RealtimeTTS {engine_type} engine loaded.")
+    return engine
 
-    ref_audio = Path(ref_audio_path)
-    if not ref_audio.exists():
-        return {
-            "status": "error",
-            "reason": f"Reference audio not found: {ref_audio}",
-        }
+def load_stream(engine: CoquiEngine | PocketTTSEngine, verbose: bool = False) -> TextToAudioStream:
+    """
+    Load RealtimeTTS's TextToAudioStream for streaming audio output.
 
-    out_path = Path(output_path) if output_path else Path("mesmerla_out.wav")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        xtts = load_xtts()
-        kwargs: dict[str, Any] = {
-            "text": text,
-            "file_path": str(out_path),
-            "language": language,
-        }
-
-        if speaker:
-            kwargs["speaker"] = speaker
-            if voice_dir:
-                kwargs["voice_dir"] = voice_dir
-
-        kwargs["speaker_wav"] = [str(ref_audio)]
-        xtts.tts_to_file(**kwargs)
-        clear_memory()
-        return {"status": "ok", "output_path": str(out_path)}
-    except Exception as e:
-        clear_memory()
-        return {"status": "error", "reason": str(e)}
-
-
-
-def play_audio(path: str):
-    if winsound is not None:
-        winsound.PlaySound(path, winsound.SND_FILENAME)
-        return
-
-    if os.name == "posix":
-        os.system(f'afplay "{path}" >/dev/null 2>&1 || aplay "{path}" >/dev/null 2>&1')
-        return
-
-    raise RuntimeError("No supported audio playback backend found.")
+    This function is separated from load_tts_engine to allow for
+    reloading the TTS engine with a different reference audio file
+    without having to reload the entire streaming pipeline.
+    """
+    stream = TextToAudioStream(engine)
+    return stream

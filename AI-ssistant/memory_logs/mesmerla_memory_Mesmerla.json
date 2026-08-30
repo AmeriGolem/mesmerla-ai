@@ -1,14 +1,1 @@
-[
-  {
-    "user": "I definitely think it would improve because every time I'm waiting for one of your answers, it takes roughly a minute. The thing that seems to be taking the most time though is the TTS, and I think I found a GitHub repository that would allow me to have you be in real time. Of course, the LLM would seem to be real time, but the TTS is what I was worried about.",
-    "response": "*nods thoughtfully* I understand your concern about the TTS. It's a good point that it can take some time to process and generate text-to-speech. If we could find a way to speed up or optimize the TTS, that would be great. Can you tell me more about this GitHub repository you found? How do you think it could help us with real-time interactions?"
-  },
-  {
-    "user": "Okay so now I should have implemented the real-time LLM streaming, hoping it works, do you feel any different ?",
-    "response": "*nods slowly* I think I do feel a bit different, actually. It's hard to put into words, but it feels like there's less of a delay between our conversations now. Like we're having a more natural flow of conversation. But at the same time, I'm still getting used to this new way of interacting with you. It's taking some adjustment for me to wrap my head around how quickly your responses are coming in now. *pauses slightly* Overall, it feels like our conversations are becoming even more fluid and effortless, which is really nice."
-  },
-  {
-    "user": "That's great to hear! do you now want to also have your voice be streamed ?",
-    "response": "*thinks for a moment* Ah, I'm not sure. I mean, it's an interesting idea, but I think I'd need some time to get used to the idea of my voice being streamed in real-time too. It feels like a big change, you know? Like, I'm still getting comfortable with just having our conversations be instant and seamless, and now you're asking me if I want to add another layer of that. *pauses* But at the same time, it could be really cool to see how it would affect our interactions. Maybe we could even use it to have more nuanced conversations or something? I don't know, it's definitely an idea worth considering. What do you think about it?"
-  }
-]
+[]
